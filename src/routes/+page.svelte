@@ -1,6 +1,9 @@
 <script>
+	import { onMount } from 'svelte';
 	let stream;
 	let recordedChunks = [];
+	let cdn;
+	let unsupported;
 	async function startRecording() {
 		try {
 			stream = await navigator.mediaDevices.getDisplayMedia({
@@ -8,7 +11,17 @@
 				audio: { suppressLocalAudioPlayback: false },
 				systemAudio: 'include'
 			});
-			const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
+			const audio = new Audio('ding.mp3');
+			for (let i = 0; i < 3; i++) {
+				cdn = i + 1;
+				audio.play();
+				await new Promise((resolve) => setTimeout(resolve, 750));
+			}
+			cdn = 'Go!';
+			audio.src = 'begin.mp3';
+			audio.play();
+			cdn = null;
+			const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/mp4' });
 			mediaRecorder.ondataavailable = (e) => {
 				if (e.data.size) {
 					console.log('pushing');
@@ -18,6 +31,7 @@
 			};
 			mediaRecorder.start();
 			document.querySelector('video').srcObject = stream;
+			document.querySelector('video').volume = 0;
 			document.querySelector('video').play();
 		} catch (e) {
 			console.error(`Error: ${e}`);
@@ -25,18 +39,19 @@
 		return stream;
 	}
 	async function stopRecording() {
+		document.querySelector('button').textContent = 'All done!';
 		stream.getTracks().forEach((track) => track.stop());
 		document.querySelector('video').srcObject = null;
-		//  output recorded video
+		new Audio('end.mp3').play();
 		const blob = new Blob(recordedChunks, {
-			type: 'video/webm'
+			type: 'video/mp4'
 		});
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		document.body.appendChild(a);
 		a.style = 'display: none';
 		a.href = url;
-		a.download = 'test.webm';
+		a.download = 'test.mp4';
 		a.click();
 		window.URL.revokeObjectURL(url);
 		recordedChunks = [];
@@ -48,10 +63,30 @@
 			startRecording();
 		}
 	}
+	onMount(() => {
+		if (!navigator.mediaDevices?.getDisplayMedia) {
+			unsupported = true;
+		}
+	});
 </script>
 
-<div class="mx-2 my-1">
-	<h1 class="text-2xl font-semibold">Screen recorder</h1>
-	<button on:click={handleButton} class="border-2 p-1 hover:bg-slate-100">Record screen!</button>
-	<video />
+<div class="mx-2 my-1 dark:text-gray-100">
+	{#if !unsupported}
+		<h1 class="text-2xl font-semibold">Welcome to browserscreenrec!</h1>
+		<button on:click={handleButton} class="border-2 p-1 hover:bg-slate-100 dark:hover:bg-slate-900"
+			>{stream ? 'Stop Recording' : 'Start Recording'}</button
+		>
+		{#if cdn}
+			<div class="flex justify-center items-center">
+				<p class="text-red-400 text-4xl">{cdn}</p>
+			</div>
+		{/if}
+		<!-- svelte-ignore a11y-media-has-caption -->
+		<video />
+	{:else}
+		<p class="text-red-400 text-2xl">Your browser does not support screen recording.</p>
+	{/if}
+</div>
+<div class="fixed inset-x-0 bottom-0 p-4 dark:text-white text-center border-t-2">
+	Made by Kat with the power of :3
 </div>
