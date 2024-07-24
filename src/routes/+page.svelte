@@ -87,6 +87,3 @@
 		<p class="text-red-400 text-2xl">Your browser does not support screen recording.</p>
 	{/if}
 </div>
-<div class="fixed inset-x-0 bottom-0 p-4 dark:text-white text-center border-t-2">
-	Made by Kat with the power of :3
-</div>
