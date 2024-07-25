@@ -43,6 +43,7 @@
 		return stream;
 	}
 	async function stopRecording() {
+		console.log('we stoppin');
 		document.querySelector('button').textContent = 'All done!';
 		stream.getTracks().forEach((track) => track.stop());
 		document.querySelector('video').srcObject = null;
@@ -50,6 +51,9 @@
 		const blob = new Blob(recordedChunks, {
 			type: 'video/mp4'
 		});
+		if (blob.size === 0) {
+			return;
+		}
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		document.body.appendChild(a);
