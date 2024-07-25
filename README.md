@@ -1,4 +1,3 @@
-# browserscreenrec
+# In-Browser Screen Recorder
 
-It does exactly what it says on the tin
-<sub><sup>i should come up with a better name</sup></sub>
+It does exactly what it says on the tin, with a decent UI and no ads.
